@@ -14,7 +14,6 @@ import { PostsService } from '../applicarion/posts.service';
 import { PostsQueryRepository } from '../infrastructure/posts.query.repository';
 import { sortNPagingPostQuery } from '../../../base/types/query.mappers';
 import { PostInputDto, PostInputQueryDto } from './dto/input/post.input.dto';
-import { BlogsQueryRepository } from '../../blogs/infrastructure/blogs.query.repository';
 import { ObjectId } from 'mongodb';
 
 @Controller('posts')
@@ -22,7 +21,6 @@ export class PostsController {
   constructor(
     private readonly postsService: PostsService,
     private readonly postsQueryRepository: PostsQueryRepository,
-    private readonly blogsQueryRepository: BlogsQueryRepository,
   ) {}
 
   @Get()

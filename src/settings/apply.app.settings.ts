@@ -1,4 +1,8 @@
-import { INestApplication } from '@nestjs/common';
+import {
+  BadRequestException,
+  INestApplication,
+  ValidationPipe,
+} from '@nestjs/common';
 import { LoggingInterceptor } from '../infrastructure/interceptors/logging.interceptor';
 import { HttpExceptionFilter } from '../infrastructure/exception-filters/http.exception.filter';
 
@@ -12,6 +16,29 @@ export const applyAppSettings = (app: INestApplication) => {
   app.useGlobalInterceptors(new LoggingInterceptor());
 
   app.enableCors();
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      stopAtFirstError: true,
+      exceptionFactory: (errors) => {
+        const responseErrors: any[] = [];
+        errors.forEach((e) => {
+          if (e.constraints) {
+            const constraintsKeys = Object.keys(e.constraints);
+            constraintsKeys.forEach((cKey) => {
+              responseErrors.push({
+                message: e.constraints![cKey],
+                field: e.property,
+              });
+            });
+          }
+        });
+        throw new BadRequestException(responseErrors);
+      },
+    }),
+  );
+
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   //const userService = app.get(UsersService)
 
@@ -31,7 +58,7 @@ export const applyAppSettings = (app: INestApplication) => {
   //setAppPipes(app);
 
   // Применение глобальных exceptions filters
-  setAppExceptionsFilters(app);
+  //setAppExceptionsFilters(app);
 };
 
 // const setAppPrefix = (app: INestApplication) => {
@@ -89,6 +116,6 @@ export const applyAppSettings = (app: INestApplication) => {
   );
 };*/
 
-const setAppExceptionsFilters = (app: INestApplication) => {
-  app.useGlobalFilters(new HttpExceptionFilter());
-};
+// const setAppExceptionsFilters = (app: INestApplication) => {
+//   app.useGlobalFilters(new HttpExceptionFilter());
+// };
