@@ -11,8 +11,8 @@ import { Buffer } from 'buffer';
 @Injectable()
 export class BasicAuthGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean | Promise<boolean> {
-    const request = context.switchToHttp().getRequest<Request>();
-    const auth = request.headers.authorization as string;
+    const req = context.switchToHttp().getRequest<Request>();
+    const auth = req.headers.authorization as string;
     if (!auth) {
       throw new UnauthorizedException();
     }

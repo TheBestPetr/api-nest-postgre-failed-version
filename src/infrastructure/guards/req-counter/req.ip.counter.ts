@@ -1,18 +1,26 @@
-import { Injectable, NestMiddleware } from '@nestjs/common';
-import { NextFunction, Request } from 'express';
+import {
+  CanActivate,
+  ExecutionContext,
+  HttpException,
+  Injectable,
+} from '@nestjs/common';
+import { Request, response } from 'express';
 import { InjectModel } from '@nestjs/mongoose';
 import { ReqCount, ReqCountModelType } from './req.ip.count.entity';
+import { HttpStatus } from '@nestjs/common';
 
 @Injectable()
-export class ReqIpCounterMiddleware implements NestMiddleware {
+export class ReqIpCounter implements CanActivate {
   constructor(
     @InjectModel(ReqCount.name)
     private readonly ReqCountModel: ReqCountModelType,
   ) {}
-  async use(req: Request, next: NextFunction) {
+  async canActivate(context: ExecutionContext): Promise<any> {
+    const req = context.switchToHttp().getRequest<Request>();
+    const { ip, originalUrl } = req;
     await this.ReqCountModel.create({
-      ip: req.ip!,
-      URL: req.originalUrl,
+      ip: ip,
+      URL: originalUrl,
       date: new Date(),
     });
 
@@ -23,10 +31,13 @@ export class ReqIpCounterMiddleware implements NestMiddleware {
       URL: req.originalUrl,
       date: { $gte: new Date(tenSecondsAgo) },
     });
-    if (reqCount > 5) {
-      throw new Error();
-    }
 
-    next();
+    if (reqCount > 5) {
+      throw new HttpException(
+        'Too many requests',
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+    return true;
   }
 }

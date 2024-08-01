@@ -23,17 +23,18 @@ import { BcryptService } from './infrastructure/utils/services/bcrypt.service';
 import { NodemailerService } from './infrastructure/utils/services/nodemailer.service';
 import { JwtService } from './infrastructure/utils/services/jwt.service';
 import { BearerAuthGuard } from './infrastructure/guards/bearer.auth.guard';
-import { ReqIpCounterMiddleware } from './infrastructure/middlewares/req-counter/req.ip.counter.middleware';
 import {
   ReqCount,
   ReqCountSchema,
-} from './infrastructure/middlewares/req-counter/req.ip.count.entity';
+} from './infrastructure/guards/req-counter/req.ip.count.entity';
 import {
   emailConfirmationCodeIsExist,
   emailIsExist,
+  emailResendingIsEmailConfirmed,
   loginIsExist,
   passwordRecoveryCodeIsExist,
 } from './features/auth/application/auth.custom.validators';
+import { ReqIpCounter } from './infrastructure/guards/req-counter/req.ip.counter';
 
 const blogsProviders = [BlogsRepository, BlogsService, BlogsQueryRepository];
 
@@ -51,6 +52,8 @@ const authProviders = [
   loginIsExist,
   emailIsExist,
   emailConfirmationCodeIsExist,
+  emailResendingIsEmailConfirmed,
+  ReqIpCounter,
 ];
 
 @Module({
@@ -70,7 +73,6 @@ const authProviders = [
     ...usersProviders,
     ...postsProviders,
     ...authProviders,
-    ReqIpCounterMiddleware,
   ],
   // Регистрация контроллеров
   controllers: [

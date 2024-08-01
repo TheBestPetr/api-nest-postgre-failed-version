@@ -20,6 +20,7 @@ import {
   AuthInputNewPasswordDto,
   AuthInputRegistrationDto,
 } from './dto/input/auth.input.dto';
+import { ReqIpCounter } from '../../../infrastructure/guards/req-counter/req.ip.counter';
 
 @Controller('auth')
 export class AuthController {
@@ -27,7 +28,6 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly usersQueryRepository: UsersQueryRepository,
   ) {}
-  //@UseGuards(ReqIpCounterMiddleware)
   @Post('registration')
   @HttpCode(204)
   async userRegistration(@Body() userInputDto: AuthInputRegistrationDto) {
@@ -48,35 +48,33 @@ export class AuthController {
     throw new UnauthorizedException();
   }
 
-  //@UseGuards(ReqIpCounterMiddleware)
   @Post('registration-confirmation')
   @HttpCode(204)
   async userRegistrationConfirmation(
     @Body() input: AuthInputEmailConfirmationDto,
   ) {
-    debugger;
     const isUserVerified = await this.authService.confirmUserEmail(input.code);
     if (!isUserVerified) {
       throw new BadRequestException();
     }
   }
 
-  //@UseGuards(ReqIpCounterMiddleware)
-  @Post('/registration-email-resending')
+  @Post('registration-email-resending')
   @HttpCode(204)
   async userRegistrationEmailResending(
     @Body() input: AuthInputEmailResendingDto,
   ) {
-    const isUserVerified = await this.authService.confirmUserEmailResending(
+    const isUserExist = await this.authService.confirmUserEmailResending(
       input.email,
     );
-    if (!isUserVerified) {
-      throw new BadRequestException();
+    if (!isUserExist) {
+      throw new BadRequestException([
+        { message: 'User is already confirmed', field: 'code' },
+      ]);
     }
   }
 
-  //@UseGuards(ReqIpCounterMiddleware)
-  @Post('/password-recovery')
+  @Post('password-recovery')
   @HttpCode(204)
   async passwordRecovery(@Body() input: AuthInputEmailPasswordRecoveryDto) {
     const isEmailSend = await this.authService.passwordRecovery(input.email);
@@ -85,8 +83,7 @@ export class AuthController {
     }
   }
 
-  //@UseGuards(ReqIpCounterMiddleware)
-  @Post('/new-password')
+  @Post('new-password')
   @HttpCode(204)
   async newPasswordConfirmation(
     @Body()
@@ -102,7 +99,8 @@ export class AuthController {
   }
 
   @UseGuards(BearerAuthGuard)
-  @Get('/me')
+  @UseGuards(ReqIpCounter)
+  @Get('me')
   @HttpCode(200)
   async getUserInfo(@Request() req) {
     const userId = req.userId;

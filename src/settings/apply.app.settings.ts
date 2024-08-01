@@ -5,6 +5,8 @@ import {
 } from '@nestjs/common';
 import { LoggingInterceptor } from '../infrastructure/interceptors/logging.interceptor';
 import { HttpExceptionFilter } from '../infrastructure/exception-filters/http.exception.filter';
+import { useContainer } from 'class-validator';
+import { AppModule } from '../app.module';
 
 // Префикс нашего приложения (https://site.com/api)
 
@@ -39,7 +41,8 @@ export const applyAppSettings = (app: INestApplication) => {
   );
 
   app.useGlobalFilters(new HttpExceptionFilter());
-
+  //define useContainer in main.ts file
+  useContainer(app.select(AppModule), { fallbackOnErrors: true });
   //const userService = app.get(UsersService)
 
   // Применение глобальных Guards

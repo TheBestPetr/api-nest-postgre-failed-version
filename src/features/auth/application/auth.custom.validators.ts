@@ -20,13 +20,11 @@ export class passwordRecoveryCodeIsExist
       !user ||
       user!.passwordRecovery!.expirationDate! < new Date().toISOString()
     ) {
-      throw new BadRequestException();
+      throw new BadRequestException([
+        { message: 'Some Error', field: 'recoveryCode' },
+      ]);
     }
     return true;
-  }
-
-  defaultMessage() {
-    return 'Recovery code does not exist';
   }
 }
 
@@ -38,13 +36,11 @@ export class loginIsExist implements ValidatorConstraintInterface {
   async validate(login: string) {
     const user = await this.usersRepository.findUserByLoginOrEmail(login);
     if (user) {
-      throw new BadRequestException();
+      throw new BadRequestException([
+        { message: 'Login does not exist', field: 'login' },
+      ]);
     }
     return true;
-  }
-
-  defaultMessage() {
-    return 'User is already exist';
   }
 }
 
@@ -56,13 +52,11 @@ export class emailIsExist implements ValidatorConstraintInterface {
   async validate(email: string) {
     const user = await this.usersRepository.findUserByLoginOrEmail(email);
     if (user) {
-      throw new BadRequestException();
+      throw new BadRequestException([
+        { message: 'Email does not exist', field: 'email' },
+      ]);
     }
     return true;
-  }
-
-  defaultMessage() {
-    return 'User is already exist';
   }
 }
 
@@ -83,7 +77,25 @@ export class emailConfirmationCodeIsExist
       user!.emailConfirmation.expirationDate! < new Date().toISOString() ||
       user!.emailConfirmation.isConfirmed
     ) {
-      throw new BadRequestException();
+      throw new BadRequestException([{ message: 'Some Error', field: 'code' }]);
+    }
+    return true;
+  }
+}
+
+@ValidatorConstraint({ name: 'emailResendingIsEmailConfirmed', async: true })
+@Injectable()
+export class emailResendingIsEmailConfirmed
+  implements ValidatorConstraintInterface
+{
+  constructor(private readonly usersRepository: UsersRepository) {}
+
+  async validate(email: string) {
+    const user = await this.usersRepository.findUserByLoginOrEmail(email);
+    if (user?.emailConfirmation.isConfirmed === true) {
+      throw new BadRequestException([
+        { message: 'Email is already confirmed', field: 'email' },
+      ]);
     }
     return true;
   }

@@ -1,4 +1,5 @@
 import {
+  IsEmail,
   IsNotEmpty,
   IsString,
   Length,
@@ -8,6 +9,7 @@ import {
 import {
   emailConfirmationCodeIsExist,
   emailIsExist,
+  emailResendingIsEmailConfirmed,
   loginIsExist,
   passwordRecoveryCodeIsExist,
 } from '../../../application/auth.custom.validators';
@@ -37,6 +39,7 @@ export class AuthInputRegistrationDto {
 
   @IsString()
   @IsNotEmpty()
+  @IsEmail()
   @Validate(emailIsExist)
   email: string;
 }
@@ -51,13 +54,15 @@ export class AuthInputEmailConfirmationDto {
 export class AuthInputEmailResendingDto {
   @IsString()
   @IsNotEmpty()
+  @IsEmail()
+  @Validate(emailResendingIsEmailConfirmed)
   email: string;
 }
 
 export class AuthInputEmailPasswordRecoveryDto {
   @IsString()
   @IsNotEmpty()
-  @Matches('[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$')
+  @IsEmail()
   email: string;
 }
 

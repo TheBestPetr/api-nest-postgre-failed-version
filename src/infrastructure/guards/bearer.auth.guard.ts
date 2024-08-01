@@ -12,23 +12,29 @@ export class BearerAuthGuard implements CanActivate {
   constructor(private readonly jwtService: JwtService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request: Request = context.switchToHttp().getRequest();
+    const req = context.switchToHttp().getRequest<Request>();
 
-    const header = request.header('Authorization');
-    if (!header) {
+    const authorization = req.header('Authorization');
+    if (!authorization) {
       throw new UnauthorizedException();
     }
 
-    const parts = header.split(' ');
-    if (parts.length !== 2 || parts[0] !== 'Bearer') {
-      throw new UnauthorizedException();
-    }
+    const parts = authorization.split(' ');
 
     const token = parts[1];
 
+    const splitToken = token.split('.');
+    if (
+      parts.length !== 2 ||
+      parts[0] !== 'Bearer' ||
+      splitToken.length !== 3
+    ) {
+      throw new UnauthorizedException();
+    }
+
     try {
       const userId = await this.jwtService.getUserIdByToken(token);
-      request['userId'] = userId;
+      req['userId'] = userId;
       return true;
     } catch (e) {
       throw new UnauthorizedException();
