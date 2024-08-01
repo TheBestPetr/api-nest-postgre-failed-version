@@ -10,9 +10,9 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { PostsService } from '../applicarion/posts.service';
+import { PostsService } from '../application/posts.service';
 import { PostsQueryRepository } from '../infrastructure/posts.query.repository';
-import { sortNPagingPostQuery } from '../../../base/types/query.mappers';
+import { sortNPagingPostQuery } from '../../../infrastructure/utils/query.mappers';
 import { PostInputDto, PostInputQueryDto } from './dto/input/post.input.dto';
 import { ObjectId } from 'mongodb';
 

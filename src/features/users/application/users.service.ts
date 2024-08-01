@@ -18,8 +18,8 @@ export class UsersService {
     createdUser.passwordHash = passwordHash;
     createdUser.email = input.email;
     createdUser.emailConfirmation = {
-      confirmationCode: null,
-      expirationDate: null,
+      confirmationCode: undefined,
+      expirationDate: undefined,
       isConfirmed: true,
     };
     createdUser.createdAt = new Date().toISOString();

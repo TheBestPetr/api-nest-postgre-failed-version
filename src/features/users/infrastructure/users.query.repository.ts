@@ -42,9 +42,15 @@ export class UsersQueryRepository {
   }
 
   async findUserById(userId: string) {
-    const user = await this.UserModel.findOne({ _id: new ObjectId(userId) });
+    const user = await this.UserModel.findOne({
+      _id: new ObjectId(userId),
+    }).exec();
     if (user) {
-      return user;
+      return {
+        email: user.email,
+        login: user.login,
+        userId: user._id.toString(),
+      };
     }
     return false;
   }

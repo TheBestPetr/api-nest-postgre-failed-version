@@ -11,17 +11,17 @@ import {
   Query,
 } from '@nestjs/common';
 import { BlogsQueryRepository } from '../infrastructure/blogs.query.repository';
-import { BlogsService } from '../applicarion/blogs.service';
+import { BlogsService } from '../application/blogs.service';
 import { BlogInputDto, BlogInputQueryDto } from './dto/input/blog.input.dto';
 import {
   sortNPagingBlogQuery,
   sortNPagingPostQuery,
-} from '../../../base/types/query.mappers';
+} from '../../../infrastructure/utils/query.mappers';
 import {
   PostInputBlogDto,
   PostInputQueryDto,
 } from '../../posts/api/dto/input/post.input.dto';
-import { PostsService } from '../../posts/applicarion/posts.service';
+import { PostsService } from '../../posts/application/posts.service';
 import { PostsQueryRepository } from '../../posts/infrastructure/posts.query.repository';
 
 @Controller('blogs')

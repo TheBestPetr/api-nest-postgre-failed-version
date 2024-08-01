@@ -8,13 +8,16 @@ import {
   Param,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
-import { UsersService } from '../applicarion/users.service';
+import { UsersService } from '../application/users.service';
 import { UserInputDto, UserInputQueryDto } from './dto/input/user.input.dto';
 import { UsersQueryRepository } from '../infrastructure/users.query.repository';
-import { sortNPagingUserQuery } from '../../../base/types/query.mappers';
+import { sortNPagingUserQuery } from '../../../infrastructure/utils/query.mappers';
+import { BasicAuthGuard } from '../../../infrastructure/guards/basic.auth.guard';
 
 @Controller('users')
+@UseGuards(BasicAuthGuard)
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,

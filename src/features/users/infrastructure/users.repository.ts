@@ -14,19 +14,45 @@ export class UsersRepository {
     return this.UserModel.deleteOne({ _id: new ObjectId(id) }).exec();
   }
 
-  /*async updateEmailConfirmation(id: string, input: Object) {
-    return UserModel.updateOne(
+  async findUserByLoginOrEmail(loginOrEmail: string) {
+    return this.UserModel.findOne({
+      $or: [{ login: loginOrEmail }, { email: loginOrEmail }],
+    }).exec();
+  }
+
+  async findUserByEmailConfirmationCode(code: string) {
+    const user = await this.UserModel.findOne({
+      'emailConfirmation.confirmationCode': code,
+    }).exec();
+    if (user) {
+      return user;
+    }
+    return null;
+  }
+
+  async updateUserEmailConfirmation(id: string, input: any) {
+    return this.UserModel.updateOne(
       { _id: new ObjectId(id) },
       {
         $set: {
           ...input,
         },
       },
-    );
-  }*/
+    ).exec();
+  }
 
-  /*async passwordRecoveryConfirmation(email: string, input: Object) {
-    return UserModel.updateOne(
+  async findUserByPasswordRecoveryCode(code: string) {
+    const user = await this.UserModel.findOne({
+      'passwordRecovery.recoveryCode': code,
+    }).exec();
+    if (user) {
+      return user;
+    }
+    return null;
+  }
+
+  async passwordRecoveryConfirmation(email: string, input: any) {
+    return this.UserModel.updateOne(
       { email: email },
       {
         $set: {
@@ -34,14 +60,14 @@ export class UsersRepository {
         },
       },
     );
-  }*/
+  }
 
-  /*async updatePasswordRecovery(
+  async updatePasswordRecovery(
     userId: string,
     newPasswordHash: string,
-    input: Object,
+    input: any,
   ) {
-    return UserModel.updateOne(
+    return this.UserModel.updateOne(
       { _id: new ObjectId(userId) },
       {
         $set: {
@@ -49,6 +75,6 @@ export class UsersRepository {
           ...input,
         },
       },
-    );
-  }*/
+    ).exec();
+  }
 }

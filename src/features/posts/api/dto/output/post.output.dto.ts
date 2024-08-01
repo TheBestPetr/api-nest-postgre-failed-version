@@ -1,4 +1,4 @@
-import { ExtendedLikesInfo } from '../../../../../base/types/like.entity';
+import { ExtendedLikesInfo } from '../../../../../infrastructure/utils/like.entity';
 
 export class PostOutputDto {
   id: string;
