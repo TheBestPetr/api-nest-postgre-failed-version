@@ -69,7 +69,7 @@ export class AuthController {
     );
     if (!isUserExist) {
       throw new BadRequestException([
-        { message: 'User is already confirmed', field: 'code' },
+        { message: 'User is already confirmed', field: 'email' },
       ]);
     }
   }
