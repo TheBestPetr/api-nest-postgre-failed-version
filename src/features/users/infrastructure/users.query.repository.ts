@@ -4,6 +4,7 @@ import { User, UserModelType } from '../domain/user.entity';
 import { UserInputQueryDto } from '../api/dto/input/user.input.dto';
 import { UserOutputQueryDto } from '../api/dto/output/user.output.dto';
 import { ObjectId } from 'mongodb';
+import { AuthIOutputDto } from '../../auth/api/dto/output/auth.output.dto';
 
 @Injectable()
 export class UsersQueryRepository {
@@ -41,7 +42,7 @@ export class UsersQueryRepository {
     };
   }
 
-  async findUserById(userId: string) {
+  async findUserById(userId: string): Promise<AuthIOutputDto | null> {
     const user = await this.UserModel.findOne({
       _id: new ObjectId(userId),
     }).exec();
@@ -52,6 +53,6 @@ export class UsersQueryRepository {
         userId: user._id.toString(),
       };
     }
-    return false;
+    return null;
   }
 }

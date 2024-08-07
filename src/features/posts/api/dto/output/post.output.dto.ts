@@ -1,4 +1,17 @@
-import { ExtendedLikesInfo } from '../../../../../infrastructure/utils/like.entity';
+import { LikeStatus } from '../../../../../base/types/like.statuses';
+
+export class LikeForPostDetailsType {
+  addedAt: string;
+  userId: string;
+  login: string;
+}
+
+export class ExtendedLikesForPostInfo {
+  likesCount: number;
+  dislikesCount: number;
+  myStatus: LikeStatus;
+  newestLikes: LikeForPostDetailsType[] | [];
+}
 
 export class PostOutputDto {
   id: string;
@@ -8,7 +21,7 @@ export class PostOutputDto {
   blogId: string;
   blogName: string;
   createdAt: string;
-  extendedLikesInfo: ExtendedLikesInfo;
+  extendedLikesInfo: ExtendedLikesForPostInfo;
 }
 
 export class PostOutputQueryDto {

@@ -1,5 +1,6 @@
 import { SortDirection } from 'mongodb';
-import { IsNotEmpty, IsString, Length } from 'class-validator';
+import { IsNotEmpty, IsString, Length, Matches } from 'class-validator';
+import { LikeStatus } from '../../../../../base/types/like.statuses';
 
 export class PostInputDto {
   @IsString()
@@ -20,6 +21,13 @@ export class PostInputDto {
   @IsString()
   @IsNotEmpty()
   blogId: string;
+}
+
+export class PostInputLikeStatusDto {
+  @IsString()
+  @IsNotEmpty()
+  @Matches(/^(None|Like|Dislike)$/)
+  likeStatus: LikeStatus;
 }
 
 export class PostInputQueryDto {

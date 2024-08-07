@@ -2,6 +2,7 @@ import { SortDirection } from 'mongodb';
 import { UserInputQueryDto } from '../../features/users/api/dto/input/user.input.dto';
 import { BlogInputQueryDto } from '../../features/blogs/api/dto/input/blog.input.dto';
 import { PostInputQueryDto } from '../../features/posts/api/dto/input/post.input.dto';
+import { CommentInputQueryDto } from '../../features/comments/api/dto/input/comment.input.dto';
 
 export const sortNPagingBlogQuery = (query: BlogInputQueryDto) => {
   return {
@@ -41,15 +42,15 @@ export const sortNPagingUserQuery = (
   };
 };
 
-// export const sortNPagingCommentQuery = (
-//   query: Partial<InputCommentQueryType>,
-// ): InputCommentQueryType => {
-//   return {
-//     pageNumber: query.pageNumber ? +query.pageNumber : 1,
-//     pageSize: query.pageSize ? +query.pageSize : 10,
-//     sortBy: query.sortBy ? query.sortBy : 'createdAt',
-//     sortDirection: query.sortDirection
-//       ? (query.sortDirection as SortDirection)
-//       : 'desc',
-//   };
-// };
+export const sortNPagingCommentQuery = (
+  query: Partial<CommentInputQueryDto>,
+): CommentInputQueryDto => {
+  return {
+    pageNumber: query.pageNumber ? +query.pageNumber : 1,
+    pageSize: query.pageSize ? +query.pageSize : 10,
+    sortBy: query.sortBy ? query.sortBy : 'createdAt',
+    sortDirection: query.sortDirection
+      ? (query.sortDirection as SortDirection)
+      : 'desc',
+  };
+};

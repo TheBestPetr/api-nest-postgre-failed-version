@@ -8,14 +8,6 @@ export class JwtService {
     });
   }
 
-  //   createRefreshJWTToken(userId: string, deviceId: string) {
-  //   return jwt.sign(
-  //     { userId: userId, deviceId: deviceId },
-  //     SETTINGS.JWT_SECRET,
-  //     { expiresIn: '20m' },
-  //   );
-  // }
-
   getUserIdByToken(token: string) {
     try {
       const result: any = jwt.verify(token, SETTINGS.JWT_SECRET);
@@ -24,6 +16,13 @@ export class JwtService {
       return null;
     }
   }
+  //   createRefreshJWTToken(userId: string, deviceId: string) {
+  //   return jwt.sign(
+  //     { userId: userId, deviceId: deviceId },
+  //     SETTINGS.JWT_SECRET,
+  //     { expiresIn: '20m' },
+  //   );
+  // }
 
   // getTokenIatNExp(token: string) {
   //   try {

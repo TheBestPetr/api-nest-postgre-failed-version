@@ -9,6 +9,8 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { BlogsQueryRepository } from '../infrastructure/blogs.query.repository';
 import { BlogsService } from '../application/blogs.service';
@@ -23,6 +25,8 @@ import {
 } from '../../posts/api/dto/input/post.input.dto';
 import { PostsService } from '../../posts/application/posts.service';
 import { PostsQueryRepository } from '../../posts/infrastructure/posts.query.repository';
+import { BasicAuthGuard } from '../../../infrastructure/guards/basic.auth.guard';
+import { BearerAuthWithout401 } from '../../../infrastructure/decorators/bearer.auth.without.401';
 
 @Controller('blogs')
 export class BlogsController {
@@ -51,6 +55,7 @@ export class BlogsController {
     return foundBlog;
   }
 
+  @UseGuards(BasicAuthGuard)
   @Post()
   @HttpCode(201)
   async createBlogController(@Body() blogInputDto: BlogInputDto) {
@@ -58,6 +63,7 @@ export class BlogsController {
     return newBlog;
   }
 
+  @UseGuards(BasicAuthGuard)
   @Put(':blogId')
   @HttpCode(204)
   async updateBlogController(
@@ -73,6 +79,7 @@ export class BlogsController {
     }
   }
 
+  @UseGuards(BasicAuthGuard)
   @Delete(':blogId')
   @HttpCode(204)
   async deleteBlogController(@Param('blogId') blogId: string) {
@@ -82,9 +89,11 @@ export class BlogsController {
     }
   }
 
+  @UseGuards(BearerAuthWithout401)
   @Get(':blogId/posts')
   @HttpCode(200)
   async findPostsByBlogIdInParams(
+    @Request() req,
     @Query() inputQuery: PostInputQueryDto,
     @Param('blogId') blogId: string,
   ) {
@@ -94,13 +103,18 @@ export class BlogsController {
     }
     const query = sortNPagingPostQuery(inputQuery);
     const foundPosts =
-      await this.postsQueryRepository.findPostsByBlogIdInParams(query, blogId);
+      await this.postsQueryRepository.findPostsByBlogIdInParams(
+        query,
+        blogId,
+        req.userId,
+      );
     if (!foundPosts) {
       throw new NotFoundException();
     }
     return foundPosts;
   }
 
+  @UseGuards(BasicAuthGuard)
   @Post(':blogId/posts')
   @HttpCode(201)
   async createPostByBlogIdInParams(

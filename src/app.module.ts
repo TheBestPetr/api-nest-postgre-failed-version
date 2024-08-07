@@ -35,12 +35,42 @@ import {
   passwordRecoveryCodeIsExist,
 } from './features/auth/application/auth.custom.validators';
 import { ReqIpCounter } from './infrastructure/guards/req-counter/req.ip.counter';
+import { CommentsService } from './features/comments/application/comments.service';
+import { CommentsRepository } from './features/comments/infrastructure/comments.repository';
+import { CommentsQueryRepository } from './features/comments/infrastructure/comments.query.repository';
+import {
+  Comment,
+  CommentSchema,
+} from './features/comments/domain/comment.entity';
+import {
+  CommentLikeEntity,
+  CommentLikeSchema,
+} from './features/comments/domain/comment.like.entity';
+import { CommentsLikeInfoRepository } from './features/comments/infrastructure/comments.like.info.repository';
+import { PostsLikeInfoRepository } from './features/posts/infrastructure/posts.like.info.repository';
+import {
+  PostLikeEntity,
+  PostLikeSchema,
+} from './features/posts/domain/post.like.entity';
+import { CommentsController } from './features/comments/api/comments.controller';
 
 const blogsProviders = [BlogsRepository, BlogsService, BlogsQueryRepository];
 
 const postsProviders = [PostsRepository, PostsService, PostsQueryRepository];
 
-const usersProviders = [UsersRepository, UsersService, UsersQueryRepository];
+const usersProviders = [
+  UsersRepository,
+  UsersService,
+  UsersQueryRepository,
+  PostsLikeInfoRepository,
+];
+
+const commentsProvider = [
+  CommentsService,
+  CommentsRepository,
+  CommentsQueryRepository,
+  CommentsLikeInfoRepository,
+];
 
 const authProviders = [
   AuthService,
@@ -64,22 +94,31 @@ const authProviders = [
     MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
     MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
     MongooseModule.forFeature([
+      { name: PostLikeEntity.name, schema: PostLikeSchema },
+    ]),
+    MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
+    MongooseModule.forFeature([
+      { name: CommentLikeEntity.name, schema: CommentLikeSchema },
+    ]),
+    MongooseModule.forFeature([
       { name: ReqCount.name, schema: ReqCountSchema },
     ]),
   ],
-  // Регистрация провайдеров
+
   providers: [
     ...blogsProviders,
     ...usersProviders,
     ...postsProviders,
     ...authProviders,
+    ...commentsProvider,
   ],
-  // Регистрация контроллеров
+
   controllers: [
     UsersController,
     BlogsController,
     PostsController,
     AuthController,
+    CommentsController,
     DeleteAllController,
   ],
 })
