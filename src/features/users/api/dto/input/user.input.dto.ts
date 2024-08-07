@@ -1,14 +1,17 @@
 import { SortDirection } from 'mongodb';
 import { IsNotEmpty, IsString, Length, Matches } from 'class-validator';
+import { Transform, TransformFnParams } from 'class-transformer';
 
 export class UserInputDto {
   @IsString()
   @IsNotEmpty()
+  @Transform(({ value }: TransformFnParams) => value?.trim())
   @Length(3, 10)
   login: string;
 
   @IsString()
   @IsNotEmpty()
+  @Transform(({ value }: TransformFnParams) => value?.trim())
   @Length(6, 20)
   password: string;
 

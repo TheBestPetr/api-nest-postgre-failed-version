@@ -11,15 +11,18 @@ import {
   emailResendingIsEmailConfirmed,
   loginIsExist,
   passwordRecoveryCodeIsExist,
-} from '../../../application/auth.custom.validators';
+} from '../auth.custom.validators';
+import { Transform, TransformFnParams } from 'class-transformer';
 
 export class AuthInputLoginDto {
   @IsString()
   @IsNotEmpty()
+  @Transform(({ value }: TransformFnParams) => value?.trim())
   loginOrEmail: string;
 
   @IsString()
   @IsNotEmpty()
+  @Transform(({ value }: TransformFnParams) => value?.trim())
   @Length(6, 20)
   password: string;
 }
@@ -28,11 +31,13 @@ export class AuthInputRegistrationDto {
   @IsString()
   @IsNotEmpty()
   @Length(3, 10)
+  @Transform(({ value }: TransformFnParams) => value?.trim())
   @Validate(loginIsExist)
   login: string;
 
   @IsString()
   @IsNotEmpty()
+  @Transform(({ value }: TransformFnParams) => value?.trim())
   @Length(6, 20)
   password: string;
 
@@ -46,6 +51,7 @@ export class AuthInputRegistrationDto {
 export class AuthInputEmailConfirmationDto {
   @IsString()
   @IsNotEmpty()
+  @Transform(({ value }: TransformFnParams) => value?.trim())
   @Validate(emailConfirmationCodeIsExist)
   code: string;
 }
@@ -68,6 +74,7 @@ export class AuthInputEmailPasswordRecoveryDto {
 export class AuthInputNewPasswordDto {
   @IsString()
   @IsNotEmpty()
+  @Transform(({ value }: TransformFnParams) => value?.trim())
   @Length(6, 20)
   newPassword: string;
 

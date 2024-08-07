@@ -7,6 +7,7 @@ import { LoggingInterceptor } from '../infrastructure/interceptors/logging.inter
 import { HttpExceptionFilter } from '../infrastructure/exception-filters/http.exception.filter';
 import { useContainer } from 'class-validator';
 import { AppModule } from '../app.module';
+import cookieParser from 'cookie-parser';
 
 // Префикс нашего приложения (https://site.com/api)
 
@@ -18,6 +19,8 @@ export const applyAppSettings = (app: INestApplication) => {
   app.useGlobalInterceptors(new LoggingInterceptor());
 
   app.enableCors();
+
+  app.use(cookieParser());
 
   app.useGlobalPipes(
     new ValidationPipe({

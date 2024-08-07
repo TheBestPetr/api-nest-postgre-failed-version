@@ -33,7 +33,7 @@ import {
   emailResendingIsEmailConfirmed,
   loginIsExist,
   passwordRecoveryCodeIsExist,
-} from './features/auth/application/auth.custom.validators';
+} from './features/auth/api/dto/auth.custom.validators';
 import { ReqIpCounter } from './infrastructure/guards/req-counter/req.ip.counter';
 import { CommentsService } from './features/comments/application/comments.service';
 import { CommentsRepository } from './features/comments/infrastructure/comments.repository';

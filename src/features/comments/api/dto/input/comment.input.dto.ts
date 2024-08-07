@@ -1,10 +1,12 @@
 import { SortDirection } from 'mongodb';
 import { IsNotEmpty, IsString, Length, Matches } from 'class-validator';
 import { LikeStatus } from '../../../../../base/types/like.statuses';
+import { Transform, TransformFnParams } from 'class-transformer';
 
 export class CommentInputDto {
   @IsString()
   @IsNotEmpty()
+  @Transform(({ value }: TransformFnParams) => value?.trim())
   @Length(20, 300)
   content: string;
 }

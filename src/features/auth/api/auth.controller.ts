@@ -8,6 +8,7 @@ import {
   UnauthorizedException,
   UseGuards,
   Request,
+  Response,
 } from '@nestjs/common';
 import { AuthService } from '../application/auth.service';
 import { UsersQueryRepository } from '../../users/infrastructure/users.query.repository';
@@ -39,10 +40,15 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(200)
-  async loginUser(@Body() userInputLoginDto: AuthInputLoginDto) {
+  async loginUser(
+    @Response({ passthrough: true }) res,
+    @Body()
+    userInputLoginDto: AuthInputLoginDto,
+  ) {
     const userId = await this.authService.checkCredentials(userInputLoginDto);
     if (userId) {
       const accessToken = await this.authService.loginUser(userId);
+      res.cookie('refreshToken', accessToken, { httpOnly: true, secure: true });
       return accessToken;
     }
     throw new UnauthorizedException();
