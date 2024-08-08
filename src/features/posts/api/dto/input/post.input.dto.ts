@@ -1,7 +1,14 @@
 import { SortDirection } from 'mongodb';
-import { IsNotEmpty, IsString, Length, Matches } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  Length,
+  Matches,
+  Validate,
+} from 'class-validator';
 import { LikeStatus } from '../../../../../base/types/like.statuses';
 import { Transform, TransformFnParams } from 'class-transformer';
+import { blogIdIsExist } from '../../../../../infrastructure/decorators/blogId.custom.decorator';
 
 export class PostInputDto {
   @IsString()
@@ -24,6 +31,7 @@ export class PostInputDto {
 
   @IsString()
   @IsNotEmpty()
+  @Validate(blogIdIsExist)
   blogId: string;
 }
 

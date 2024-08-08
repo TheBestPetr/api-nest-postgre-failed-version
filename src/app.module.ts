@@ -33,7 +33,7 @@ import {
   emailResendingIsEmailConfirmed,
   loginIsExist,
   passwordRecoveryCodeIsExist,
-} from './features/auth/api/dto/auth.custom.validators';
+} from './infrastructure/decorators/auth.custom.decorator';
 import { ReqIpCounter } from './infrastructure/guards/req-counter/req.ip.counter';
 import { CommentsService } from './features/comments/application/comments.service';
 import { CommentsRepository } from './features/comments/infrastructure/comments.repository';
@@ -53,10 +53,16 @@ import {
   PostLikeSchema,
 } from './features/posts/domain/post.like.entity';
 import { CommentsController } from './features/comments/api/comments.controller';
+import { blogIdIsExist } from './infrastructure/decorators/blogId.custom.decorator';
 
 const blogsProviders = [BlogsRepository, BlogsService, BlogsQueryRepository];
 
-const postsProviders = [PostsRepository, PostsService, PostsQueryRepository];
+const postsProviders = [
+  PostsRepository,
+  PostsService,
+  PostsQueryRepository,
+  blogIdIsExist,
+];
 
 const usersProviders = [
   UsersRepository,

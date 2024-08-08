@@ -11,7 +11,7 @@ import {
   emailResendingIsEmailConfirmed,
   loginIsExist,
   passwordRecoveryCodeIsExist,
-} from '../auth.custom.validators';
+} from '../../../../../infrastructure/decorators/auth.custom.decorator';
 import { Transform, TransformFnParams } from 'class-transformer';
 
 export class AuthInputLoginDto {

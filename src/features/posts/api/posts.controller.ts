@@ -24,7 +24,6 @@ import {
   PostInputLikeStatusDto,
   PostInputQueryDto,
 } from './dto/input/post.input.dto';
-import { ObjectId } from 'mongodb';
 import {
   CommentInputDto,
   CommentInputQueryDto,
@@ -44,11 +43,12 @@ export class PostsController {
     private readonly commentsQueryRepository: CommentsQueryRepository,
   ) {}
 
+  @UseGuards(BearerAuthWithout401)
   @Get()
   @HttpCode(200)
-  async findPosts(@Query() inputQuery: PostInputQueryDto) {
+  async findPosts(@Request() req, @Query() inputQuery: PostInputQueryDto) {
     const query = sortNPagingPostQuery(inputQuery);
-    const posts = await this.postsQueryRepository.findPosts(query);
+    const posts = await this.postsQueryRepository.findPosts(query, req.userId);
     return posts;
   }
 
@@ -84,9 +84,6 @@ export class PostsController {
     @Param('postId') postId: string,
     @Body() postInputDto: PostInputDto,
   ) {
-    if (!ObjectId.isValid(postId)) {
-      throw new NotFoundException();
-    }
     const updatedPost = await this.postsService.updatePost(
       postId,
       postInputDto,
@@ -100,9 +97,6 @@ export class PostsController {
   @Delete(':postId')
   @HttpCode(204)
   async deletePost(@Param('postId') postId: string) {
-    if (!ObjectId.isValid(postId)) {
-      throw new NotFoundException();
-    }
     const isDelete = await this.postsService.deletePost(postId);
     if (!isDelete) {
       throw new NotFoundException();

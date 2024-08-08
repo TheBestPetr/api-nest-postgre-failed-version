@@ -28,7 +28,6 @@ export class CommentsController {
   constructor(
     private readonly commentsService: CommentsService,
     private readonly commentsQueryRepository: CommentsQueryRepository,
-    private readonly postsQueryRepository: PostsQueryRepository,
   ) {}
   @UseGuards(BearerAuthWithout401)
   @Get(':commentId')
@@ -74,7 +73,7 @@ export class CommentsController {
   }
 
   @UseGuards(BearerAuthGuard)
-  @Delete('commentId')
+  @Delete(':commentId')
   @HttpCode(204)
   async deleteController(
     @Request() req,

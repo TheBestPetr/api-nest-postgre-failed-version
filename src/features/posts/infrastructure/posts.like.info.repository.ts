@@ -1,12 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
-  PostLikeDocument,
   PostLikeEntity,
   PostLikeInfoModelType,
 } from '../domain/post.like.entity';
 import { LikeStatus } from '../../../base/types/like.statuses';
-import { ObjectIdExpression } from 'mongoose';
 import { WithId } from 'mongodb';
 
 @Injectable()
