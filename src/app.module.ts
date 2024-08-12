@@ -54,6 +54,18 @@ import {
 } from './features/posts/domain/post.like.entity';
 import { CommentsController } from './features/comments/api/comments.controller';
 import { blogIdIsExist } from './infrastructure/decorators/blogId.custom.decorator';
+import {
+  RefreshTokenEntity,
+  RefreshTokenBlacklistSchema,
+} from './features/auth/domain/refresh.token.entity';
+import {
+  Device,
+  DeviceSchema,
+} from './features/securityDevices/domain/device.entity';
+import { DevicesService } from './features/securityDevices/application/devices.service';
+import { DevicesRepository } from './features/securityDevices/infrastructure/devices.repository';
+import { DevicesController } from './features/securityDevices/api/devices.controller';
+import { RefreshTokenRepository } from './features/auth/infrastructure/refrest.token.repository';
 
 const blogsProviders = [BlogsRepository, BlogsService, BlogsQueryRepository];
 
@@ -89,8 +101,11 @@ const authProviders = [
   emailIsExist,
   emailConfirmationCodeIsExist,
   emailResendingIsEmailConfirmed,
+  RefreshTokenRepository,
   ReqIpCounter,
 ];
+
+const devicesProviders = [DevicesService, DevicesRepository];
 
 @Module({
   // Регистрация модулей
@@ -109,6 +124,13 @@ const authProviders = [
     MongooseModule.forFeature([
       { name: ReqCount.name, schema: ReqCountSchema },
     ]),
+    MongooseModule.forFeature([
+      {
+        name: RefreshTokenEntity.name,
+        schema: RefreshTokenBlacklistSchema,
+      },
+    ]),
+    MongooseModule.forFeature([{ name: Device.name, schema: DeviceSchema }]),
   ],
 
   providers: [
@@ -117,6 +139,7 @@ const authProviders = [
     ...postsProviders,
     ...authProviders,
     ...commentsProvider,
+    ...devicesProviders,
   ],
 
   controllers: [
@@ -125,6 +148,7 @@ const authProviders = [
     PostsController,
     AuthController,
     CommentsController,
+    DevicesController,
     DeleteAllController,
   ],
 })

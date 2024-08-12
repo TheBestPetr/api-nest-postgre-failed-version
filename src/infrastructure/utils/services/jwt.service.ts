@@ -4,7 +4,7 @@ import { SETTINGS } from '../../../settings/app.settings';
 export class JwtService {
   createAccessJWTToken(userId: string) {
     return jwt.sign({ userId: userId }, SETTINGS.JWT_SECRET, {
-      expiresIn: '5m',
+      expiresIn: '10s',
     });
   }
 
@@ -16,32 +16,33 @@ export class JwtService {
       return null;
     }
   }
-  //   createRefreshJWTToken(userId: string, deviceId: string) {
-  //   return jwt.sign(
-  //     { userId: userId, deviceId: deviceId },
-  //     SETTINGS.JWT_SECRET,
-  //     { expiresIn: '20m' },
-  //   );
-  // }
 
-  // getTokenIatNExp(token: string) {
-  //   try {
-  //     const result: any = jwt.verify(token, SETTINGS.JWT_SECRET);
-  //     return {
-  //       iat: result.iat,
-  //       exp: result.exp,
-  //     };
-  //   } catch (e) {
-  //     return null;
-  //   }
-  // }
+  createRefreshJWTToken(userId: string, deviceId: string) {
+    return jwt.sign(
+      { userId: userId, deviceId: deviceId },
+      SETTINGS.JWT_SECRET,
+      { expiresIn: '20s' },
+    );
+  }
 
-  // getDeviceIdByToken(token: string) {
-  //   try {
-  //     const result: any = jwt.verify(token, SETTINGS.JWT_SECRET);
-  //     return result.deviceId.toString();
-  //   } catch (e) {
-  //     return null;
-  //   }
-  // }
+  getTokenIatNExp(token: string) {
+    try {
+      const result: any = jwt.verify(token, SETTINGS.JWT_SECRET);
+      return {
+        iat: result.iat,
+        exp: result.exp,
+      };
+    } catch (e) {
+      return null;
+    }
+  }
+
+  getDeviceIdByToken(token: string) {
+    try {
+      const result: any = jwt.verify(token, SETTINGS.JWT_SECRET);
+      return result.deviceId.toString();
+    } catch (e) {
+      return null;
+    }
+  }
 }

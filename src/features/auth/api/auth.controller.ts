@@ -29,6 +29,7 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly usersQueryRepository: UsersQueryRepository,
   ) {}
+  @UseGuards(ReqIpCounter)
   @Post('registration')
   @HttpCode(204)
   async userRegistration(@Body() userInputDto: AuthInputRegistrationDto) {
@@ -38,22 +39,58 @@ export class AuthController {
     }
   }
 
+  @UseGuards(ReqIpCounter)
   @Post('login')
   @HttpCode(200)
   async loginUser(
     @Response({ passthrough: true }) res,
+    @Request() req,
     @Body()
     userInputLoginDto: AuthInputLoginDto,
   ) {
     const userId = await this.authService.checkCredentials(userInputLoginDto);
     if (userId) {
-      const accessToken = await this.authService.loginUser(userId);
-      res.cookie('refreshToken', accessToken, { httpOnly: true, secure: true });
-      return accessToken;
+      const tokens = await this.authService.loginUser(
+        userId,
+        req.ip!,
+        req.headers['user-agent']!,
+      );
+      res.cookie('refreshToken', tokens?.refreshToken, {
+        httpOnly: true,
+        secure: true,
+      });
+      return { accessToken: tokens.accessToken };
     }
     throw new UnauthorizedException();
   }
+  @Post('logout')
+  @HttpCode(204)
+  async userLogout(@Request() req) {
+    const isUserLogout = await this.authService.logoutUser(
+      req.cookies.refreshToken,
+    );
+    if (!isUserLogout) {
+      throw new UnauthorizedException();
+    }
+  }
 
+  @Post('refresh-token')
+  @HttpCode(200)
+  async createNewTokens(@Request() req, @Response() res) {
+    const newTokens = await this.authService.createNewTokens(
+      req.cookies.refreshToken,
+    );
+    if (!newTokens) {
+      return;
+    }
+    res.cookie('refreshToken', newTokens.refreshToken, {
+      httpOnly: true,
+      secure: true,
+    });
+    return { accessToken: newTokens.accessToken };
+  }
+
+  @UseGuards(ReqIpCounter)
   @Post('registration-confirmation')
   @HttpCode(204)
   async userRegistrationConfirmation(
@@ -65,6 +102,7 @@ export class AuthController {
     }
   }
 
+  @UseGuards(ReqIpCounter)
   @Post('registration-email-resending')
   @HttpCode(204)
   async userRegistrationEmailResending(
@@ -80,6 +118,7 @@ export class AuthController {
     }
   }
 
+  @UseGuards(ReqIpCounter)
   @Post('password-recovery')
   @HttpCode(204)
   async passwordRecovery(@Body() input: AuthInputEmailPasswordRecoveryDto) {
@@ -89,6 +128,7 @@ export class AuthController {
     }
   }
 
+  @UseGuards(ReqIpCounter)
   @Post('new-password')
   @HttpCode(204)
   async newPasswordConfirmation(
@@ -105,7 +145,6 @@ export class AuthController {
   }
 
   @UseGuards(BearerAuthGuard)
-  @UseGuards(ReqIpCounter)
   @Get('me')
   @HttpCode(200)
   async getUserInfo(@Request() req) {

@@ -16,6 +16,14 @@ import {
   CommentLikeEntity,
   CommentLikeInfoModelType,
 } from '../comments/domain/comment.like.entity';
+import {
+  Device,
+  DeviceModelType,
+} from '../securityDevices/domain/device.entity';
+import {
+  RefreshTokenBlacklistModelType,
+  RefreshTokenEntity,
+} from '../auth/domain/refresh.token.entity';
 
 @Controller('testing/all-data')
 export class DeleteAllController {
@@ -30,6 +38,9 @@ export class DeleteAllController {
     private CommentLikeInfoModel: CommentLikeInfoModelType,
     @InjectModel(ReqCount.name)
     private readonly ReqCountModel: ReqCountModelType,
+    @InjectModel(Device.name) private DeviceModel: DeviceModelType,
+    @InjectModel(RefreshTokenEntity.name)
+    private RefreshTokenBlacklistModel: RefreshTokenBlacklistModelType,
   ) {}
   @Delete()
   @HttpCode(204)
@@ -41,5 +52,7 @@ export class DeleteAllController {
     await this.CommentModel.deleteMany();
     await this.CommentLikeInfoModel.deleteMany();
     await this.ReqCountModel.deleteMany();
+    await this.DeviceModel.deleteMany();
+    await this.RefreshTokenBlacklistModel.deleteMany();
   }
 }
