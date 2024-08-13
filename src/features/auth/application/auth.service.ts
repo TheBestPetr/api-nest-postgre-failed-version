@@ -82,7 +82,7 @@ export class AuthService {
       userId,
       newDeviceId,
     );
-    const iatNExp = this.jwtService.getTokenIatNExp(refreshToken);
+    const iatNExp = await this.jwtService.getTokenIatNExp(refreshToken);
     const newDevice = new Device();
     newDevice.userId = userId;
     newDevice.deviceId = newDeviceId;
@@ -116,11 +116,11 @@ export class AuthService {
   async createNewTokens(refreshToken: string): Promise<TokensType | null> {
     const isTokenInBlacklist =
       await this.refreshTokenRepository.isTokenInBlacklist(refreshToken);
-    const userId = this.jwtService.getUserIdByToken(refreshToken);
-    const deviceId = this.jwtService.getDeviceIdByToken(refreshToken);
-    const oldIat = this.jwtService.getTokenIatNExp(refreshToken);
+    const userId = await this.jwtService.getUserIdByToken(refreshToken);
+    const deviceId = await this.jwtService.getDeviceIdByToken(refreshToken);
+    const oldIat = await this.jwtService.getTokenIatNExp(refreshToken);
     const isDeviceExist =
-      this.devicesRepository.findSessionByDeviceId(deviceId);
+      await this.devicesRepository.findSessionByDeviceId(deviceId);
     if (!userId || isTokenInBlacklist || !isDeviceExist) {
       return null;
     }

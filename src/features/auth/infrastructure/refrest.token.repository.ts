@@ -13,7 +13,10 @@ export class RefreshTokenRepository {
     await this.RefreshTokenBlacklistModel.create({ token: token });
   }
 
-  async isTokenInBlacklist(token: string) {
-    return this.RefreshTokenBlacklistModel.findOne({ token: token }).exec();
+  async isTokenInBlacklist(token: string): Promise<boolean> {
+    const isTokenExist = await this.RefreshTokenBlacklistModel.findOne({
+      token: token,
+    }).exec();
+    return !!isTokenExist;
   }
 }

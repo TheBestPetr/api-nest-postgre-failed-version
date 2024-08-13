@@ -76,12 +76,12 @@ export class AuthController {
 
   @Post('refresh-token')
   @HttpCode(200)
-  async createNewTokens(@Request() req, @Response() res) {
+  async createNewTokens(@Request() req, @Response({ passthrough: true }) res) {
     const newTokens = await this.authService.createNewTokens(
       req.cookies.refreshToken,
     );
     if (!newTokens) {
-      return;
+      throw new UnauthorizedException();
     }
     res.cookie('refreshToken', newTokens.refreshToken, {
       httpOnly: true,
@@ -153,7 +153,6 @@ export class AuthController {
       const user = await this.usersQueryRepository.findUserById(userId);
       return user;
     }
-
     throw new UnauthorizedException();
   }
 }

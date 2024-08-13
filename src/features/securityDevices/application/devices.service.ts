@@ -10,7 +10,7 @@ export class DevicesService {
     private readonly devicesRepository: DevicesRepository,
   ) {}
   async createDevice(input: Device): Promise<boolean> {
-    return await this.devicesRepository.create(input);
+    return this.devicesRepository.create(input);
   }
 
   async updateDeviceIatNExp(
@@ -19,16 +19,11 @@ export class DevicesService {
     iat: string,
     exp: string,
   ): Promise<boolean> {
-    return await this.devicesRepository.updateIatNExp(
-      deviceId,
-      oldIat,
-      iat,
-      exp,
-    );
+    return this.devicesRepository.updateIatNExp(deviceId, oldIat, iat, exp);
   }
 
   async findSessionToTerminate(deviceId: string): Promise<string | null> {
-    return await this.devicesRepository.findSessionByDeviceId(deviceId);
+    return this.devicesRepository.findSessionByDeviceId(deviceId);
   }
 
   async isUserCanTerminateSession(
@@ -41,11 +36,11 @@ export class DevicesService {
     if (userId !== isSessionBelongsToUser) {
       return false;
     }
-    return await this.devicesRepository.deleteSessionByDeviceId(deviceId);
+    return this.devicesRepository.deleteSessionByDeviceId(deviceId);
   }
 
   async terminateAllSessions(refreshToken: string): Promise<boolean> {
     const deviceId = this.jwtService.getDeviceIdByToken(refreshToken);
-    return await this.devicesRepository.deleteAllSessions(deviceId);
+    return this.devicesRepository.deleteAllSessions(deviceId);
   }
 }
