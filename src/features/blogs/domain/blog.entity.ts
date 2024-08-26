@@ -1,27 +1,22 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Model } from 'mongoose';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
-@Schema()
+@Entity()
 export class Blog {
-  @Prop({ required: true })
+  @PrimaryGeneratedColumn()
+  id: string;
+
+  @Column({ type: 'varchar', length: 15 })
   name: string;
 
-  @Prop({ required: true })
+  @Column({ type: 'varchar', length: 500 })
   description: string;
 
-  @Prop({ required: true })
+  @Column({ type: 'varchar', length: 100 })
   websiteUrl: string;
 
-  @Prop({ required: true })
+  @Column({ type: 'timestamp with time zone' })
   createdAt: string;
 
-  @Prop({ required: true })
+  @Column({ type: 'boolean' })
   isMembership: boolean; // false until hw 24
 }
-
-export const BlogSchema = SchemaFactory.createForClass(Blog);
-BlogSchema.loadClass(Blog);
-
-export type BlogDocument = HydratedDocument<Blog>;
-
-export type BlogModelType = Model<BlogDocument>;

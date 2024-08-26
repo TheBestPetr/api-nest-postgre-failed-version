@@ -14,11 +14,11 @@ export class passwordRecoveryCodeIsExist
   constructor(private readonly usersRepository: UsersRepository) {}
 
   async validate(recoveryCode: string) {
-    const user =
+    const userPasswordRecovery =
       await this.usersRepository.findUserByPasswordRecoveryCode(recoveryCode);
     if (
-      !user ||
-      user!.passwordRecovery!.expirationDate! < new Date().toISOString()
+      !userPasswordRecovery ||
+      userPasswordRecovery.expirationDate! < new Date().toISOString()
     ) {
       throw new BadRequestException([
         { message: 'Some Error', field: 'recoveryCode' },
@@ -68,14 +68,14 @@ export class emailConfirmationCodeIsExist
   constructor(private readonly usersRepository: UsersRepository) {}
 
   async validate(confirmationCode: string) {
-    const user =
+    const userEmailConfirmation =
       await this.usersRepository.findUserByEmailConfirmationCode(
         confirmationCode,
       );
     if (
-      !user ||
-      user!.emailConfirmation.expirationDate! < new Date().toISOString() ||
-      user!.emailConfirmation.isConfirmed
+      !userEmailConfirmation ||
+      userEmailConfirmation.expirationDate! < new Date().toISOString() ||
+      userEmailConfirmation.isConfirmed
     ) {
       throw new BadRequestException([{ message: 'Some Error', field: 'code' }]);
     }
@@ -91,8 +91,9 @@ export class emailResendingIsEmailConfirmed
   constructor(private readonly usersRepository: UsersRepository) {}
 
   async validate(email: string) {
-    const user = await this.usersRepository.findUserByLoginOrEmail(email);
-    if (user?.emailConfirmation.isConfirmed === true) {
+    const userEmailConfirmationInfo =
+      await this.usersRepository.findUserEmailConfirmationInfo(email);
+    if (userEmailConfirmationInfo.isConfirmed === true) {
       throw new BadRequestException([
         { message: 'Email is already confirmed', field: 'email' },
       ]);

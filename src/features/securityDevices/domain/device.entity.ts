@@ -1,30 +1,22 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Model } from 'mongoose';
+import { Column, Entity } from 'typeorm';
 
-@Schema()
+@Entity()
 export class Device {
-  @Prop({ required: true })
+  @Column({ type: 'uuid' })
   userId: string;
 
-  @Prop({ required: true })
+  @Column({ type: 'uuid' })
   deviceId: string;
 
-  @Prop({ required: true })
+  @Column({ type: 'timestamp with time zone' })
   iat: string;
 
-  @Prop({ required: true })
+  @Column({ type: 'varchar' })
   deviceName: string;
 
-  @Prop({ required: true })
+  @Column({ type: 'varchar' })
   ip: string;
 
-  @Prop({ required: true })
+  @Column({ type: 'timestamp with time zone' })
   exp: string;
 }
-
-export const DeviceSchema = SchemaFactory.createForClass(Device);
-DeviceSchema.loadClass(Device);
-
-export type DeviceDocument = HydratedDocument<Device>;
-
-export type DeviceModelType = Model<DeviceDocument>;

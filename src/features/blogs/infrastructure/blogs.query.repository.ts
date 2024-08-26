@@ -1,26 +1,29 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Blog, BlogModelType } from '../domain/blog.entity';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import { BlogInputQueryDto } from '../api/dto/input/blog.input.dto';
 import {
   BlogOutputDto,
   BlogOutputQueryDto,
 } from '../api/dto/output/blog.output.dto';
-import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class BlogsQueryRepository {
-  constructor(@InjectModel(Blog.name) private BlogModel: BlogModelType) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
   async findBlogs(query: BlogInputQueryDto): Promise<BlogOutputQueryDto> {
     const search = query.searchNameTerm
       ? { name: { $regex: query.searchNameTerm, $options: 'i' } }
       : {};
-    const items = await this.BlogModel.find(search)
-      .sort({ [`${query.sortBy}`]: query.sortDirection })
-      .skip((query.pageNumber - 1) * query.pageSize)
-      .limit(query.pageSize as number)
-      .exec();
-    const totalCount = await this.BlogModel.countDocuments(search);
+    const items = await this.dataSource.query(`
+        SELECT id, name, description, "websiteUrl", "createdAt", "isMembership"
+        FROM public.blogs
+        WHERE "name" ILIKE '%${search}%'
+        ORDER BY "createdAt" ${query.sortBy}
+        LIMIT ${query.pageSize} OFFSET ${(query.pageNumber - 1) * query.pageSize}
+    `);
+    const totalCount = await this.dataSource.query(
+      `SELECT COUNT (*) FROM public.blogs`,
+    );
     return {
       pagesCount: Math.ceil(totalCount / query.pageSize),
       page: query.pageNumber,
@@ -38,9 +41,10 @@ export class BlogsQueryRepository {
   }
 
   async findBlogById(blogId: string): Promise<BlogOutputDto | null> {
-    const blog = await this.BlogModel.findOne({
-      _id: new ObjectId(blogId),
-    }).exec();
+    const blog = await this.dataSource.query(`
+        SELECT id, name, description, "websiteUrl", "createdAt", "isMembership"
+        FROM public.blogs
+        WHERE "id" = '${blogId}';`);
     if (blog) {
       return {
         id: blog._id.toString(),

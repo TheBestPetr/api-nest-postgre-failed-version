@@ -1,4 +1,3 @@
-import { SortDirection } from 'mongodb';
 import { IsNotEmpty, IsString, Length, Matches } from 'class-validator';
 import { LikeStatus } from '../../../../../base/types/like.statuses';
 import { Transform, TransformFnParams } from 'class-transformer';
@@ -22,5 +21,5 @@ export class CommentInputQueryDto {
   pageNumber: number;
   pageSize: number;
   sortBy: string;
-  sortDirection: SortDirection;
+  sortDirection: 1 | -1 | 'asc' | 'desc' | 'ascending' | 'descending';
 }

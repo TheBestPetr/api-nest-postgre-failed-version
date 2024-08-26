@@ -1,45 +1,40 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Model } from 'mongoose';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Schema({ _id: false })
+@Entity()
 export class CommentatorInfo {
-  @Prop({ required: true })
+  @Column({ type: 'uuid' })
+  commentId: string;
+
+  @Column({ type: 'uuid' })
   userId: string;
 
-  @Prop({ required: true })
+  @Column({ type: 'varchar', length: 10 })
   userLogin: string;
 }
 
-@Schema({ _id: false })
+@Entity()
 export class LikesInfo {
-  @Prop({ required: true })
+  @Column()
+  commentId: string;
+
+  @Column({ type: 'integer' })
   likesCount: number;
 
-  @Prop({ required: true })
+  @Column({ type: 'integer' })
   dislikesCount: number;
 }
 
-@Schema()
+@Entity()
 export class Comment {
-  @Prop({ required: true })
+  @PrimaryGeneratedColumn()
+  id: string;
+
+  @Column({ type: 'uuid' })
   postId: string;
 
-  @Prop({ required: true })
+  @Column({ type: 'varchar', length: 300 })
   content: string;
 
-  @Prop({ required: true })
-  commentatorInfo: CommentatorInfo;
-
-  @Prop({ required: true })
+  @Column({ type: 'timestamp with time zone' })
   createdAt: string;
-
-  @Prop({ required: true })
-  likesInfo: LikesInfo;
 }
-
-export const CommentSchema = SchemaFactory.createForClass(Comment);
-CommentSchema.loadClass(Comment);
-
-export type CommentDocument = HydratedDocument<Comment>;
-
-export type CommentModelType = Model<CommentDocument>;

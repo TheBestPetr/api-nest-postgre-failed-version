@@ -1,26 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import {
-  PostLikeEntity,
-  PostLikeInfoModelType,
-} from '../domain/post.like.entity';
+import { PostLikeEntity } from '../domain/post.like.entity';
 import { LikeStatus } from '../../../base/types/like.statuses';
-import { WithId } from 'mongodb';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class PostsLikeInfoRepository {
-  constructor(
-    @InjectModel(PostLikeEntity.name)
-    private PostLikeInfoModel: PostLikeInfoModelType,
-  ) {}
-  async findPostsLikesInfo(
-    postId: string,
-    userId: string,
-  ): Promise<WithId<PostLikeEntity> | null> {
-    return this.PostLikeInfoModel.findOne({
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  async findPostsLikesInfo(postId: string, userId: string) {
+    return this.dataSource.query;
+    /*PostLikeInfoModel.findOne({
       postId: postId,
       userId: userId,
-    }).exec();
+    }).exec();*/
     // if (result) {
     //   return result;
     // }

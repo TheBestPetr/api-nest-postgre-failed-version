@@ -1,27 +1,35 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Post, PostModelType } from '../domain/post.entity';
-import { ObjectId } from 'mongodb';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { Post } from '../domain/post.entity';
 import { PostInputDto } from '../api/dto/input/post.input.dto';
 import { LikeStatus } from '../../../base/types/like.statuses';
 
 @Injectable()
 export class PostsRepository {
-  constructor(@InjectModel(Post.name) private PostModel: PostModelType) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
   async createPost(input: Post) {
-    return this.PostModel.create(input);
+    return this.dataSource.query(`
+        INSERT INTO public.posts( 
+            title, 
+            "shortDescription", 
+            content, 
+            "blogId", 
+            "blogName", 
+            "createdAt")
+            VALUES (
+                '${input.title}', 
+                '${input.shortDescription}', 
+                '${input.content}', 
+                '${input.blogId}', 
+                '${input.blogName}', 
+                 ${input.createdAt}
+            );
+    `);
   }
 
   async updatePost(postId: string, input: PostInputDto) {
-    return this.PostModel.updateOne(
-      { _id: new ObjectId(postId) },
-      {
-        $set: {
-          ...input,
-          blogId: new ObjectId(input.blogId).toString(),
-        },
-      },
-    ).exec();
+    return this;
   }
 
   async deletePost(postId: string) {

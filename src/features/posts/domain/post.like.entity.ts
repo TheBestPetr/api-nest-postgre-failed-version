@@ -1,27 +1,19 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Model } from 'mongoose';
+import { Column, Entity } from 'typeorm';
 
-@Schema()
+@Entity()
 export class PostLikeEntity {
-  @Prop({ required: true })
+  @Column({ type: 'uuid' })
   postId: string;
 
-  @Prop({ required: true })
+  @Column({ type: 'uuid' })
   userId: string;
 
-  @Prop({ required: true })
+  @Column({ type: 'varchar' })
   userLogin: string;
 
-  @Prop({ enum: ['None', 'Like', 'Dislike'], required: true })
+  @Column({ enum: ['None', 'Like', 'Dislike'] })
   status: string;
 
-  @Prop({ required: true })
+  @Column({ type: 'timestamp with time zone' })
   createdAt: string;
 }
-
-export const PostLikeSchema = SchemaFactory.createForClass(PostLikeEntity);
-PostLikeSchema.loadClass(PostLikeEntity);
-
-export type PostLikeDocument = HydratedDocument<PostLikeEntity>;
-
-export type PostLikeInfoModelType = Model<PostLikeDocument>;

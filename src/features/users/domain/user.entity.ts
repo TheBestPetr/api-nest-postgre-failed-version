@@ -1,55 +1,46 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Model } from 'mongoose';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Schema({ _id: false })
+@Entity()
 export class EmailConfirmation {
-  @Prop({ type: String, required: false })
-  confirmationCode: string | undefined;
+  @Column({ type: 'uuid' })
+  userId: string;
 
-  @Prop({ type: String, required: false })
-  expirationDate: string | undefined;
+  @Column({ type: 'uuid' })
+  confirmationCode: string | null;
 
-  @Prop({ required: true })
+  @Column({ type: 'timestamp with time zone' })
+  expirationDate: string | null;
+
+  @Column({ type: 'boolean' })
   isConfirmed: boolean;
 }
 
-@Schema({ _id: false })
+@Entity()
 export class PasswordRecovery {
-  @Prop({ type: String, required: false })
+  @Column({ type: 'uuid' })
+  userId: string | undefined;
+
+  @Column({ type: 'varchar' })
   recoveryCode: string | undefined;
 
-  @Prop({ type: String, required: false })
+  @Column({ type: 'timestamp with time zone' })
   expirationDate: string | undefined;
 }
 
-@Schema()
+@Entity()
 export class User {
-  @Prop({ required: true })
+  @PrimaryGeneratedColumn()
+  id: string;
+
+  @Column({ type: 'varchar', length: 10 })
   login: string;
 
-  @Prop({ required: true })
+  @Column({ type: 'varchar' })
   passwordHash: string;
 
-  @Prop({ required: false })
-  passwordRecovery: PasswordRecovery;
-
-  @Prop({ required: true })
+  @Column({ type: 'varchar' })
   email: string;
 
-  @Prop({ required: true })
-  emailConfirmation: EmailConfirmation;
-
-  @Prop({ required: true })
+  @Column({ type: 'timestamp with time zone' })
   createdAt: string;
 }
-
-export const UserSchema = SchemaFactory.createForClass(User);
-UserSchema.loadClass(User);
-
-export type UserDocument = HydratedDocument<User>;
-
-/*type UserModelStaticType = {
-  createUser: (name: string, email: string | null) => UserDocument;
-};*/
-
-export type UserModelType = Model<UserDocument>; // & UserModelStaticType;

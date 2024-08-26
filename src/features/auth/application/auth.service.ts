@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { UserInputDto } from '../../users/api/dto/input/user.input.dto';
-import { User } from '../../users/domain/user.entity';
+import {
+  EmailConfirmation,
+  PasswordRecovery,
+  User,
+} from '../../users/domain/user.entity';
 import { add } from 'date-fns';
 import { BcryptService } from '../../../infrastructure/utils/services/bcrypt.service';
 import { UsersRepository } from '../../users/infrastructure/users.repository';
@@ -9,10 +13,10 @@ import { randomUUID } from 'node:crypto';
 import { JwtService } from '../../../infrastructure/utils/services/jwt.service';
 import { AuthInputLoginDto } from '../api/dto/input/auth.input.dto';
 import { TokensType } from '../../../base/types/tokens.type';
-import { RefreshTokenRepository } from '../infrastructure/refrest.token.repository';
 import { DevicesRepository } from '../../securityDevices/infrastructure/devices.repository';
 import { DevicesService } from '../../securityDevices/application/devices.service';
 import { Device } from '../../securityDevices/domain/device.entity';
+import { RefreshTokenRepository } from '../infrastructure/refresh.token.repository';
 
 @Injectable()
 export class AuthService {
@@ -35,7 +39,7 @@ export class AuthService {
         user.passwordHash,
       );
       if (isPassCorrect) {
-        return user._id.toString();
+        return user.id;
       }
     }
     return null;
@@ -52,18 +56,19 @@ export class AuthService {
     createdUser.passwordHash = passwordHash;
     createdUser.email = input.email;
     createdUser.createdAt = new Date().toISOString();
-    createdUser.emailConfirmation = {
-      confirmationCode: randomUUID(),
-      expirationDate: expDate,
-      isConfirmed: false,
-    };
-    await this.usersRepository.createUser(createdUser);
+
+    const userEmailConfirmation = new EmailConfirmation();
+    userEmailConfirmation.confirmationCode = randomUUID().toString();
+    userEmailConfirmation.expirationDate = expDate;
+    userEmailConfirmation.isConfirmed = false;
+
+    await this.usersRepository.createUser(createdUser, userEmailConfirmation);
 
     this.nodemailerService
       .sendRegistrationEmail(
         createdUser.email,
         'User registration code',
-        createdUser.emailConfirmation!.confirmationCode!,
+        userEmailConfirmation.confirmationCode,
       )
       .catch((error) => {
         console.error('Send email error', error);
@@ -149,14 +154,8 @@ export class AuthService {
         confirmationCode,
       );
     if (user) {
-      user.emailConfirmation.confirmationCode = undefined;
-      user.emailConfirmation.expirationDate = undefined;
-      user.emailConfirmation.isConfirmed = true;
-      const result = await this.usersRepository.updateUserEmailConfirmation(
-        user._id.toString(),
-        user,
-      );
-      return result.matchedCount === 1;
+      await this.usersRepository.updateAccessUserEmailConfirmation(user.userId);
+      return true;
     }
     return false;
   }
@@ -164,21 +163,22 @@ export class AuthService {
   async confirmUserEmailResending(email: string): Promise<boolean> {
     const user = await this.usersRepository.findUserByLoginOrEmail(email);
     if (user) {
-      user.emailConfirmation.confirmationCode = randomUUID();
-      user.emailConfirmation.expirationDate = add(new Date(), {
+      const userEmailConfirmation = new EmailConfirmation();
+      userEmailConfirmation.confirmationCode = randomUUID();
+      userEmailConfirmation.expirationDate = add(new Date(), {
         hours: 1,
         minutes: 1,
       }).toISOString();
       const result = await this.usersRepository.updateUserEmailConfirmation(
-        user._id.toString(),
-        user,
+        user.id,
+        userEmailConfirmation,
       );
       if (result) {
         this.nodemailerService
           .sendRegistrationEmail(
             user.email,
             'User registration new code',
-            user.emailConfirmation!.confirmationCode!,
+            userEmailConfirmation.confirmationCode,
           )
           .catch((error) => {
             console.error(error);
@@ -192,16 +192,16 @@ export class AuthService {
   async passwordRecovery(email: string): Promise<boolean> {
     const user = await this.usersRepository.findUserByLoginOrEmail(email);
     if (user) {
-      user.passwordRecovery = {
-        recoveryCode: randomUUID(),
-        expirationDate: add(new Date(), {
-          hours: 1,
-          minutes: 1,
-        }).toISOString(),
-      };
+      const userPasswordRecovery = new PasswordRecovery();
+      userPasswordRecovery.userId = user.id;
+      userPasswordRecovery.recoveryCode = randomUUID().toString();
+      userPasswordRecovery.expirationDate = add(new Date(), {
+        hours: 1,
+        minutes: 1,
+      }).toISOString();
       const result = await this.usersRepository.passwordRecoveryConfirmation(
         email,
-        user,
+        userPasswordRecovery,
       );
       if (result) {
         this.nodemailerService
@@ -226,15 +226,16 @@ export class AuthService {
     const user =
       await this.usersRepository.findUserByPasswordRecoveryCode(recoveryCode);
     if (user) {
-      user.passwordRecovery!.recoveryCode = undefined;
-      user.passwordRecovery!.expirationDate = undefined;
+      const userPasswordRecovery = new PasswordRecovery();
+      userPasswordRecovery.recoveryCode = undefined;
+      userPasswordRecovery.expirationDate = undefined;
       const newPasswordHash = await this.bcryptService.genHash(password);
-      const result = await this.usersRepository.updatePasswordRecovery(
-        user._id.toString(),
+      await this.usersRepository.updatePasswordRecovery(
+        user.id,
         newPasswordHash,
-        user,
+        userPasswordRecovery,
       );
-      return result.matchedCount === 1;
+      return true;
     }
     return false;
   }

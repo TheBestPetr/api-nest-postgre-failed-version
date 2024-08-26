@@ -1,19 +1,36 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Device, DeviceModelType } from '../domain/device.entity';
-import { RefreshTokenRepository } from '../../auth/infrastructure/refrest.token.repository';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { RefreshTokenRepository } from '../../auth/infrastructure/refresh.token.repository';
 import { JwtService } from '../../../infrastructure/utils/services/jwt.service';
+import { Device } from '../domain/device.entity';
 import { DeviceOutputDto } from '../api/dto/output/device.output.dto';
 
 @Injectable()
 export class DevicesRepository {
   constructor(
-    @InjectModel(Device.name) private DeviceModel: DeviceModelType,
+    @InjectDataSource() private dataSource: DataSource,
     private readonly refreshTokenRepository: RefreshTokenRepository,
     private readonly jwtService: JwtService,
   ) {}
   async create(input: Device): Promise<boolean> {
-    const result = await this.DeviceModel.create(input);
+    const result = await this.dataSource.query(`
+        INSERT INTO public."securityDevices"(
+            "userId", 
+            "deviceId", 
+            iat, 
+            "deviceName", 
+            ip, 
+            exp
+        )
+            VALUES (
+                '${input.userId}', 
+                '${input.deviceId}', 
+                ${input.iat}, 
+                '${input.deviceName}', 
+                '${input.ip}', 
+                ${input.exp});
+            `);
     return !!result;
   }
 
@@ -23,25 +40,28 @@ export class DevicesRepository {
     iat: string,
     exp: string,
   ): Promise<boolean> {
-    const result = await this.DeviceModel.updateOne(
-      { deviceId: deviceId, iat: oldIat },
-      { $set: { iat: iat, exp: exp } },
-    ).exec();
-    return !!result.matchedCount;
+    const result = await this.dataSource.query(`
+        UPDATE public."securityDevices"
+            SET iat = ${iat}, 
+                exp = ${exp}
+            WHERE "deviceId" = '${deviceId}' AND 
+                  "iat" = '${oldIat}';
+            `);
+    return !!result;
   }
 
   async deleteSessionByDeviceId(deviceId: string): Promise<boolean> {
-    const result = await this.DeviceModel.deleteOne({
-      deviceId: deviceId,
-    }).exec();
-    return !!result.deletedCount;
+    const result = await this.dataSource.query(`
+        DELETE FROM public."securityDevices"
+            WHERE "deviceId" = '${deviceId}';`);
+    return !!result;
   }
 
   async deleteAllSessions(deviceId: string): Promise<boolean> {
-    const result = await this.DeviceModel.deleteMany({
-      deviceId: { $nin: [deviceId] },
-    }).exec();
-    return !!result.deletedCount;
+    const result = await this.dataSource.query(`
+        DELETE FROM public."securityDevices"
+            WHERE "deviceId" != '${deviceId}';`);
+    return !!result;
   }
 
   async findActiveSessions(
@@ -49,10 +69,17 @@ export class DevicesRepository {
   ): Promise<DeviceOutputDto[] | null> {
     const isTokenInBlackList =
       await this.refreshTokenRepository.isTokenInBlacklist(refreshToken);
-    const userId = this.jwtService.getUserIdByToken(refreshToken);
-    const activeSessions = await this.DeviceModel.find({
-      userId: userId,
-    }).exec();
+    const userId = await this.jwtService.getUserIdByToken(refreshToken);
+    const activeSessions = await this.dataSource.query(`
+        SELECT 
+            "userId", 
+            "deviceId",
+            iat, 
+            "deviceName", 
+            ip, 
+            exp
+            FROM public."securityDevices"
+            WHERE "userId" = '${userId}'`);
     if (!userId || !activeSessions || isTokenInBlackList) {
       return null;
     }
@@ -65,12 +92,16 @@ export class DevicesRepository {
   }
 
   async findSessionByDeviceId(deviceId: string): Promise<string | null> {
-    const session = await this.DeviceModel.findOne({
-      deviceId: deviceId,
-    }).exec();
-    if (session) {
-      return session.userId;
-    }
-    return null;
+    const session = await this.dataSource.query(`
+        SELECT 
+            "userId", 
+            "deviceId", 
+            iat, 
+            "deviceName", 
+            ip, 
+            exp
+            FROM public."securityDevices"
+            WHERE "deviceId" = '${deviceId}'`);
+    return session.userId;
   }
 }

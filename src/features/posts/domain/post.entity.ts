@@ -1,42 +1,37 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Model } from 'mongoose';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Schema({ _id: false })
+@Entity()
 export class PostLikesCount {
-  @Prop({ required: true })
+  @Column({ type: 'uuid' })
+  postId: string;
+
+  @Column({ type: 'integer' })
   likesCount: number;
 
-  @Prop({ required: true })
+  @Column({ type: 'integer' })
   dislikesCount: number;
 }
 
-@Schema()
+@Entity()
 export class Post {
-  @Prop({ required: true })
+  @PrimaryGeneratedColumn()
+  id: string;
+
+  @Column({ type: 'varchar', length: 30 })
   title: string;
 
-  @Prop({ required: true })
+  @Column({ type: 'varchar', length: 100 })
   shortDescription: string;
 
-  @Prop({ required: true })
+  @Column({ type: 'varchar', length: 1000 })
   content: string;
 
-  @Prop({ required: true })
+  @Column({ type: 'uuid' })
   blogId: string;
 
-  @Prop({ required: true })
+  @Column({ type: 'varchar' })
   blogName: string;
 
-  @Prop({ required: true })
+  @Column({ type: 'timestamp with time zone' })
   createdAt: string;
-
-  @Prop({ required: true })
-  likesInfo: PostLikesCount;
 }
-
-export const PostSchema = SchemaFactory.createForClass(Post);
-PostSchema.loadClass(Post);
-
-export type PostDocument = HydratedDocument<Post>;
-
-export type PostModelType = Model<PostDocument>;

@@ -1,22 +1,13 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Model } from 'mongoose';
-import { User } from '../../../features/users/domain/user.entity';
+import { Column, Entity } from 'typeorm';
 
-@Schema()
+@Entity()
 export class ReqCount {
-  @Prop({ required: true })
+  @Column({ type: 'varchar' })
   ip: string;
 
-  @Prop({ required: true })
+  @Column({ type: 'varchar' })
   URL: string;
 
-  @Prop({ required: true })
+  @Column({ type: 'timestamp with time zone' })
   date: Date;
 }
-
-export const ReqCountSchema = SchemaFactory.createForClass(ReqCount);
-ReqCountSchema.loadClass(User);
-
-export type ReqCountDocument = HydratedDocument<ReqCount>;
-
-export type ReqCountModelType = Model<ReqCountDocument>;

@@ -1,4 +1,3 @@
-import { SortDirection } from 'mongodb';
 import { IsNotEmpty, IsString, Length, Matches } from 'class-validator';
 import { Transform, TransformFnParams } from 'class-transformer';
 
@@ -25,7 +24,7 @@ export class BlogInputDto {
 export class BlogInputQueryDto {
   searchNameTerm: string | null;
   sortBy: string;
-  sortDirection: SortDirection;
+  sortDirection: 1 | -1 | 'asc' | 'desc' | 'ascending' | 'descending';
   pageNumber: number;
   pageSize: number;
 }

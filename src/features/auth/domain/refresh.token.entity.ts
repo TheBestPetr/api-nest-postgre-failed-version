@@ -1,18 +1,7 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Model } from 'mongoose';
+import { Column, Entity } from 'typeorm';
 
-@Schema()
+@Entity()
 export class RefreshTokenEntity {
-  @Prop({ required: true })
+  @Column({ type: 'varchar' })
   token: string;
 }
-
-export const RefreshTokenBlacklistSchema =
-  SchemaFactory.createForClass(RefreshTokenEntity);
-RefreshTokenBlacklistSchema.loadClass(RefreshTokenEntity);
-
-export type RefreshTokenBlacklistDocument =
-  HydratedDocument<RefreshTokenEntity>;
-
-export type RefreshTokenBlacklistModelType =
-  Model<RefreshTokenBlacklistDocument>;

@@ -1,58 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { User, UserModelType } from '../domain/user.entity';
-import { UserInputQueryDto } from '../api/dto/input/user.input.dto';
-import { UserOutputQueryDto } from '../api/dto/output/user.output.dto';
-import { ObjectId } from 'mongodb';
-import { AuthIOutputDto } from '../../auth/api/dto/output/auth.output.dto';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class UsersQueryRepository {
-  constructor(@InjectModel(User.name) private UserModel: UserModelType) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  async findUsers() {}
 
-  async findUsers(query: UserInputQueryDto): Promise<UserOutputQueryDto> {
-    const searchWithEmail = query.searchEmailTerm
-      ? { email: { $regex: query.searchEmailTerm, $options: 'i' } }
-      : {};
-    const searchWithLogin = query.searchLoginTerm
-      ? { login: { $regex: query.searchLoginTerm, $options: 'i' } }
-      : {};
-    const items = await this.UserModel.find({
-      $or: [searchWithEmail, searchWithLogin],
-    })
-      .sort({ [`${query.sortBy}`]: query.sortDirection })
-      .skip((query.pageNumber - 1) * query.pageSize)
-      .limit(query.pageSize)
-      .exec();
-
-    const totalCount = await this.UserModel.countDocuments({
-      $or: [searchWithEmail, searchWithLogin],
-    });
+  async findUserById(userId: string) {
+    const user = await this.dataSource.query(
+      `SELECT *
+        FROM public.users
+        WHERE "id" = '${userId}';`,
+    );
     return {
-      pagesCount: Math.ceil(totalCount / query.pageSize),
-      page: query.pageNumber,
-      pageSize: query.pageSize,
-      totalCount: totalCount as number,
-      items: items.map((user) => ({
-        id: user._id.toString(),
-        login: user.login,
-        email: user.email,
-        createdAt: user.createdAt,
-      })),
+      email: user.email,
+      login: user.login,
+      userId: user.id,
     };
-  }
-
-  async findUserById(userId: string): Promise<AuthIOutputDto | null> {
-    const user = await this.UserModel.findOne({
-      _id: new ObjectId(userId),
-    }).exec();
-    if (user) {
-      return {
-        email: user.email,
-        login: user.login,
-        userId: user._id.toString(),
-      };
-    }
-    return null;
   }
 }
